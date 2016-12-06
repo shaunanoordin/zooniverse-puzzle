@@ -68,18 +68,27 @@ class App {
         newPiece.style.left = newPiece.dataset.x + "px";
         newPiece.style.top = newPiece.dataset.y + "px";
         
-        newPiece.innerHTML = x + "," + y;
+        newPiece.innerHTML = x + "," + y;  //DEBUG
         
-        newPiece.onmousedown = this.onPieceMouseDown.bind(this);
-        newPiece.onmouseup = this.onPieceMouseUp.bind(this);
-        newPiece.onmouseover = this.onPointerOver.bind(this);
+        if ("onmousedown" in newPiece && "onmousemove" in newPiece && "onmouseover" in newPiece) {
+          newPiece.onmousedown = this.onPiecePointerStart.bind(this);
+          newPiece.onmouseup = this.onPiecePointerEnd.bind(this);
+          newPiece.onmouseover = this.onPointerOver.bind(this);
+        }
+        
+        if ("ontouchstart" in newPiece && "ontouchend" in newPiece && "ontouchcancel" in newPiece) {
+          newPiece.ontouchstart = this.onPiecePointerStart.bind(this);
+          newPiece.ontouchend = this.onPiecePointerEnd.bind(this);
+          newPiece.ontouchcancel = this.onPiecePointerEnd.bind(this);
+        }
         
         this.puzzlePieces.push(newPiece);
         this.puzzleBoard.appendChild(newPiece);
       }
     }
     
-    this.puzzleBoard.onmousemove = this.onPointerMove.bind(this);
+    if ("onmousemove" in this.puzzleBoard) { this.puzzleBoard.onmousemove = this.onPointerMove.bind(this); }
+    if ("ontouchmove" in this.puzzleBoard) { this.puzzleBoard.ontouchmove = this.onPointerMove.bind(this); }
     this.updateSize();
   }
   
@@ -120,7 +129,7 @@ class App {
     return { x: inputX, y: inputY };
   }
   
-  onPieceMouseDown(e) {
+  onPiecePointerStart(e) {
     this.activePiece = e.target;
     this.activePiece.className = "piece active";
     this.pointer.offset.x = e.target.dataset.x - this.pointer.now.x;
@@ -129,7 +138,7 @@ class App {
     stopEvent(e);
   }
   
-  onPieceMouseUp(e) {
+  onPiecePointerEnd(e) {
     this.activePiece = null;
     const distX = Math.abs(e.target.dataset.x - e.target.dataset.correctX);
     const distY = Math.abs(e.target.dataset.y - e.target.dataset.correctY);

@@ -8,4 +8,4 @@ export const GUTTER_SIZE = 2;
 export const STATE_IDLE = 0;
 export const STATE_MOVING = 1;
 
-export const SNAP_DISTANCE = PIECE_SIZE / 4;
+export const SNAP_DISTANCE = PIECE_SIZE / 1.2;
