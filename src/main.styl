@@ -39,7 +39,6 @@ table
   flex-direction: column
   width: 100%
   height: 100%
-  max-width: 50em
   margin: 0 auto
   background: light-colour
 
@@ -56,5 +55,20 @@ table
 
 #app > main
   flex: 1 1 auto
-  padding: 1em
+  padding: 0
   background: light-colour
+
+#puzzle
+  background: #666
+  background: linear-gradient(to bottom right, #ccc, #666)
+  margin: auto
+  position: relative
+  overflow: hidden
+  touch-action: none  //Prevents IE/Edge from intrepreting touch input as scroll/pan commands.
+
+
+  .piece
+    position: absolute
+    border: 1px solid #39c
+    cursor: all-scroll
+    touch-action: none  //Prevents IE/Edge from intrepreting touch input as scroll/pan commands.
