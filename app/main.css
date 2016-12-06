@@ -63,6 +63,7 @@ table th {
   touch-action: none;
 }
 #puzzle .piece {
+  background: rgba(255,255,255,0.9);
   position: absolute;
   border: 1px solid #39c;
   cursor: all-scroll;

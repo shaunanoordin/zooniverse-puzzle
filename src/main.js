@@ -25,10 +25,14 @@ class App {
     this.sizeRatioX = 1;
     this.sizeRatioY = 1;
     this.pointer = {
+      offset: {
+        x: 0,
+        y: 0,
+      },
       now: {
         x: 0,
         y: 0,
-      }
+      },
     };
     
     if ("onresize" in window) { window.onresize = this.updateSize.bind(this); }
@@ -62,6 +66,7 @@ class App {
         
         newPiece.onmousedown = this.onPieceMouseDown.bind(this);
         newPiece.onmouseup = this.onPieceMouseUp.bind(this);
+        newPiece.onmouseover = this.onPointerOver.bind(this);
         
         this.puzzlePieces.push(newPiece);
         this.puzzleBoard.appendChild(newPiece);
@@ -86,6 +91,13 @@ class App {
     return stopEvent(e);
   }
   
+  onPointerOver(e) {
+    if (!this.activePiece) {
+      this.puzzleBoard.appendChild(e.target);
+    }
+    return stopEvent(e);
+  }
+  
   getPointerXY(e) {
     let clientX = 0;
     let clientY = 0;
@@ -103,23 +115,37 @@ class App {
   }
   
   onPieceMouseDown(e) {
-    this.activePiece = e.target;    
+    this.activePiece = e.target;
+    this.pointer.offset.x = e.target.dataset.x - this.pointer.now.x;
+    this.pointer.offset.y = e.target.dataset.y - this.pointer.now.y;
+    this.puzzleBoard.appendChild(this.activePiece);
     stopEvent(e);
   }
   
   onPieceMouseUp(e) {
     this.activePiece = null;
+    
     stopEvent(e);
   }
   
   run() {
-    console.log(this.pointer.now.x, this.pointer.now.y);
     if (this.activePiece) {
-      this.activePiece.dataset.x = this.pointer.now.x;
-      this.activePiece.dataset.y = this.pointer.now.y;
+      this.activePiece.dataset.x = this.pointer.now.x + this.pointer.offset.x;
+      this.activePiece.dataset.y = this.pointer.now.y + this.pointer.offset.y;
       this.activePiece.style.left = this.activePiece.dataset.x + "px";
       this.activePiece.style.top = this.activePiece.dataset.y + "px";
     }
+    
+    this.puzzlePieces.map(piece => {
+      if (piece !== this.activePiece) {
+        if (piece.dataset.x < 0) { piece.dataset.x = 0; }
+        if (piece.dataset.y < 0) { piece.dataset.y = 0; }
+        if (piece.dataset.x > this.width - APP.PIECE_SIZE) { piece.dataset.x = this.width - APP.PIECE_SIZE; }
+        if (piece.dataset.y > this.height - APP.PIECE_SIZE) { piece.dataset.y = this.height - APP.PIECE_SIZE; }
+        piece.style.left = piece.dataset.x + "px";
+        piece.style.top = piece.dataset.y + "px";
+      }
+    });
   }
 }
 //==============================================================================
