@@ -62,10 +62,21 @@ table th {
   overflow: hidden;
   touch-action: none;
 }
+#puzzle #grid {
+  border: 1px solid #fff;
+  position: absolute;
+}
 #puzzle .piece {
   background: rgba(255,255,255,0.9);
   position: absolute;
-  border: 1px solid #39c;
+  border: 1px solid #333;
   cursor: all-scroll;
   touch-action: none;
+}
+#puzzle .piece.active {
+  border: 1px solid #f33;
+  box-shadow: 4px 4px 4px #333;
+}
+#puzzle .piece.correct {
+  border: 1px solid #c33;
 }

@@ -66,10 +66,21 @@ table
   overflow: hidden
   touch-action: none  //Prevents IE/Edge from intrepreting touch input as scroll/pan commands.
 
+  #grid
+    border: 1px solid light-colour
+    position: absolute
 
   .piece
     background: rgba(255, 255, 255, 0.9)
     position: absolute
-    border: 1px solid #39c
+    border: 1px solid dark-colour
     cursor: all-scroll
     touch-action: none  //Prevents IE/Edge from intrepreting touch input as scroll/pan commands.
+    
+    &.active
+      border: 1px solid highlight-colour
+      box-shadow: 4px 4px 4px dark-colour;
+
+    &.correct
+      border: 1px solid primary-colour
+

@@ -110,15 +110,21 @@
 	      this.puzzleBoard.style.width = this.width + "px";
 	      this.puzzleBoard.style.height = this.height + "px";
 
+	      var grid = document.getElementById("grid");
+	      grid.style.width = APP.GRID_WIDTH * APP.PIECE_SIZE + "px";
+	      grid.style.height = APP.GRID_HEIGHT * APP.PIECE_SIZE + "px";
+	      grid.style.left = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
+	      grid.style.top = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
+
 	      this.puzzlePieces = [];
 	      for (var y = 0; y < APP.GRID_HEIGHT; y++) {
 	        for (var x = 0; x < APP.GRID_WIDTH; x++) {
 	          var newPiece = document.createElement("div");
 	          newPiece.className = "piece";
-	          newPiece.dataset.correctX = x * APP.PIECE_SIZE;
-	          newPiece.dataset.correctY = y * APP.PIECE_SIZE;
-	          newPiece.dataset.x = Math.floor(Math.random() * APP.GRID_WIDTH * APP.PIECE_SIZE);
-	          newPiece.dataset.y = Math.floor(Math.random() * APP.GRID_HEIGHT * APP.PIECE_SIZE);
+	          newPiece.dataset.correctX = (x + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE;
+	          newPiece.dataset.correctY = (y + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE;
+	          newPiece.dataset.x = Math.floor(Math.random() * (APP.GRID_WIDTH + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE);
+	          newPiece.dataset.y = Math.floor(Math.random() * (APP.GRID_HEIGHT + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE);
 	          newPiece.style.width = APP.PIECE_SIZE + "px";
 	          newPiece.style.height = APP.PIECE_SIZE + "px";
 	          newPiece.style.left = newPiece.dataset.x + "px";
@@ -180,6 +186,7 @@
 	    key: "onPieceMouseDown",
 	    value: function onPieceMouseDown(e) {
 	      this.activePiece = e.target;
+	      this.activePiece.className = "piece active";
 	      this.pointer.offset.x = e.target.dataset.x - this.pointer.now.x;
 	      this.pointer.offset.y = e.target.dataset.y - this.pointer.now.y;
 	      this.puzzleBoard.appendChild(this.activePiece);
@@ -189,7 +196,18 @@
 	    key: "onPieceMouseUp",
 	    value: function onPieceMouseUp(e) {
 	      this.activePiece = null;
-
+	      var distX = Math.abs(e.target.dataset.x - e.target.dataset.correctX);
+	      var distY = Math.abs(e.target.dataset.y - e.target.dataset.correctY);
+	      var dist = Math.sqrt(distX * distX + distY * distY);
+	      if (dist < APP.SNAP_DISTANCE) {
+	        e.target.dataset.x = e.target.dataset.correctX;
+	        e.target.dataset.y = e.target.dataset.correctY;
+	        e.target.style.left = e.target.dataset.x + "px";
+	        e.target.style.top = e.target.dataset.y + "px";
+	        e.target.className = "piece correct";
+	      } else {
+	        e.target.className = "piece";
+	      }
 	      stopEvent(e);
 	    }
 	  }, {
@@ -265,13 +283,15 @@
 	});
 	var FRAMES_PER_SECOND = exports.FRAMES_PER_SECOND = 50;
 
-	var PIECE_SIZE = exports.PIECE_SIZE = 80;
-	var GRID_WIDTH = exports.GRID_WIDTH = 8;
-	var GRID_HEIGHT = exports.GRID_HEIGHT = 6;
-	var GUTTER_SIZE = exports.GUTTER_SIZE = 1;
+	var PIECE_SIZE = exports.PIECE_SIZE = 80; //80;
+	var GRID_WIDTH = exports.GRID_WIDTH = 2; //8;
+	var GRID_HEIGHT = exports.GRID_HEIGHT = 2; //6;
+	var GUTTER_SIZE = exports.GUTTER_SIZE = 2;
 
 	var STATE_IDLE = exports.STATE_IDLE = 0;
 	var STATE_MOVING = exports.STATE_MOVING = 1;
+
+	var SNAP_DISTANCE = exports.SNAP_DISTANCE = PIECE_SIZE / 4;
 
 /***/ }
 /******/ ]);
