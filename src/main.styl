@@ -80,6 +80,14 @@ table
   #grid
     border: 1px solid light-colour
     position: absolute
+  
+  #hint
+    position: absolute
+    opacity: 0
+    
+    &.show-hint
+      animation-name: fade-to-nothing
+      animation-duration: 15s
 
   .piece
     background: rgba(255, 255, 255, 0.9) no-repeat 0px 0px
@@ -100,13 +108,14 @@ table
       border: 1px solid dark-colour
       box-shadow: none
   
-#help
+button
   border: 1px solid dark-colour
   background: primary-colour
   color: light-colour
   border-radius: 2em
   display: block
   margin: 0.5em auto
+  cursor: pointer
 
 @keyframes winning-glow
   0%
@@ -115,3 +124,11 @@ table
     color: primary-colour
   100%
     color: light-colour
+
+@keyframes fade-to-nothing
+  0%
+    opacity: 1
+    filter: grayscale(0%)
+  100%
+    opacity: 0
+    filter: grayscale(100%)

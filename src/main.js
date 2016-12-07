@@ -18,13 +18,6 @@ class App {
     this.state = APP.STATE_IDLE;
     this.activePiece = null;
     this.puzzleBoard = null;
-    this.easyMode = false;
-    this.simpleMode = false;
-    if (window.location && window.location.search && window.location.search.indexOf) {
-      this.easyMode = window.location.search.indexOf(APP.EASYMODE_STRING) >= 0;
-      this.simpleMode = window.location.search.indexOf(APP.SIMPLEMODE_STRING) >= 0;
-    }
-    
     
     this.width = 1;
     this.height = 1;
@@ -46,12 +39,34 @@ class App {
       },
     };
     
+    this.easyMode = false;
+    this.simpleMode = false;
+    if (window.location && window.location.search && window.location.search.indexOf) {
+      this.easyMode = window.location.search.indexOf(APP.EASYMODE_STRING) >= 0;
+      this.simpleMode = window.location.search.indexOf(APP.SIMPLEMODE_STRING) >= 0;
+    }
+    
+    this.cheatCode = [
+      APP.KEY_CODES.P,
+      APP.KEY_CODES.E,
+      APP.KEY_CODES.N,
+      APP.KEY_CODES.G,
+      APP.KEY_CODES.U,
+      APP.KEY_CODES.I,
+      APP.KEY_CODES.N,
+      APP.KEY_CODES.S,
+    ];
+    this.cheatCodeLevel = 0;
+    this.goSolveEverything = false;
+    
     if ("onresize" in window) { window.onresize = this.updateSize.bind(this); }
+    if ("onkeypress" in window) { window.onkeypress = this.onKeyPress.bind(this); }
     
     this.initPuzzleBoard();
     this.runCycle = setInterval(this.run.bind(this), 1000 / APP.FRAMES_PER_SECOND);
     
-    document.getElementById("help").onclick = this.onHelpClick.bind(this);
+    document.getElementById("help-button").onclick = this.onHelpClick.bind(this);
+    document.getElementById("hint-button").onclick = this.onHintClick.bind(this);
   }
   
   initPuzzleBoard(imageFile = "penguins.jpg", gridWidth = APP.GRID_WIDTH, gridHeight = APP.GRID_HEIGHT) {
@@ -66,6 +81,14 @@ class App {
     grid.style.height = gridHeight * APP.PIECE_SIZE + "px";
     grid.style.left = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
     grid.style.top = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
+    
+    const hint = document.getElementById("hint");
+    console.log(hint);
+    hint.style.width = gridWidth * APP.PIECE_SIZE + "px";
+    hint.style.height = gridHeight * APP.PIECE_SIZE + "px";
+    hint.style.left = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
+    hint.style.top = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
+    hint.style.backgroundImage = "url('assets/"+imageFile+"')";
     
     if (this.simpleMode) {
       gridWidth = gridWidth / APP.SIMPLEMODE_MULTIPLIER;
@@ -132,6 +155,20 @@ class App {
     this.sizeRatioY = this.height / this.boundingBox.height;
   }
   
+  onKeyPress(e) {
+    const key = getKeyCode(e);
+    if (this.cheatCodeLevel < this.cheatCode.length &&
+        key === this.cheatCode[this.cheatCodeLevel]) {
+      this.cheatCodeLevel++
+    } else {
+      this.cheatCodeLevel = 0;
+    }
+    
+    if (this.cheatCodeLevel >= this.cheatCode.length) {
+      this.goSolveEverything = true;
+    }
+  }
+  
   checkWinStatus() {
     let winStatus = true;
     if (this.activePiece) { winStatus = false; }
@@ -146,6 +183,7 @@ class App {
     if (winStatus) {
       title.className = "winner";
       title.innerHTML = APP.WINNER_MESSAGE;
+      this.goSolveEverything = false;
     } else {
       title.className = "";
       title.innerHTML = APP.START_MESSAGE;
@@ -161,6 +199,16 @@ class App {
         this.puzzleBoard.appendChild(piece);
       }
     });
+  }
+  
+  onHintClick() {
+    const hint = document.getElementById("hint");
+    if (hint.className === "") {
+      hint.className = "show-hint";
+    } else {
+      hint.className = "";
+    }
+    
   }
   
   onPointerMove(e) {
@@ -240,6 +288,18 @@ class App {
       this.activePiece.dataset.y = this.pointer.now.y + this.pointer.offset.y;
       this.activePiece.style.left = this.activePiece.dataset.x + "px";
       this.activePiece.style.top = this.activePiece.dataset.y + "px";
+    } else if (this.goSolveEverything) {
+      for (let i = 0; i < this.puzzlePieces.length; i++) {
+        const piece = this.puzzlePieces[i];
+        if (piece.dataset.x !== piece.dataset.correctX ||
+            piece.dataset.y !== piece.dataset.correctY) {
+          piece.dataset.x = piece.dataset.correctX;
+          piece.dataset.y = piece.dataset.correctY;
+          piece.className = "piece correct";
+          break;
+        }
+      }
+      this.checkWinStatus();
     }
     
     this.puzzlePieces.map(piece => {
@@ -266,6 +326,24 @@ function stopEvent(e) {
   e.returnValue = false;
   e.cancelBubble = true;
   return false;
+}
+
+function getKeyCode(e) {
+  //KeyboardEvent.keyCode is the most reliable identifier for a keyboard event
+  //at the moment, but unfortunately it's being deprecated.
+  if (e.keyCode) {
+    return e.keyCode;
+  }
+
+  //KeyboardEvent.code and KeyboardEvent.key are the 'new' standards, but it's
+  //far from being standardised between browsers.
+  if (e.code && APP.KEY_VALUES[e.code]) {
+    return APP.KEY_VALUES[e.code]
+  } else if (e.key && APP.KEY_VALUES[e.key]) {
+    return APP.KEY_VALUES[e.key]
+  }
+
+  return 0;
 }
 //==============================================================================
 

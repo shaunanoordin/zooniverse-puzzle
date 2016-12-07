@@ -79,6 +79,14 @@ table th {
   border: 1px solid #fff;
   position: absolute;
 }
+#puzzle #hint {
+  position: absolute;
+  opacity: 0;
+}
+#puzzle #hint.show-hint {
+  animation-name: fade-to-nothing;
+  animation-duration: 15s;
+}
 #puzzle .piece {
   background: rgba(255,255,255,0.9) no-repeat 0px 0px;
   position: absolute;
@@ -98,13 +106,14 @@ table th {
   border: 1px solid #333;
   box-shadow: none;
 }
-#help {
+button {
   border: 1px solid #333;
   background: #c33;
   color: #fff;
   border-radius: 2em;
   display: block;
   margin: 0.5em auto;
+  cursor: pointer;
 }
 @-moz-keyframes winning-glow {
   0% {
@@ -148,5 +157,45 @@ table th {
   }
   100% {
     color: #fff;
+  }
+}
+@-moz-keyframes fade-to-nothing {
+  0% {
+    opacity: 1;
+    filter: grayscale(0%);
+  }
+  100% {
+    opacity: 0;
+    filter: grayscale(100%);
+  }
+}
+@-webkit-keyframes fade-to-nothing {
+  0% {
+    opacity: 1;
+    filter: grayscale(0%);
+  }
+  100% {
+    opacity: 0;
+    filter: grayscale(100%);
+  }
+}
+@-o-keyframes fade-to-nothing {
+  0% {
+    opacity: 1;
+    filter: grayscale(0%);
+  }
+  100% {
+    opacity: 0;
+    filter: grayscale(100%);
+  }
+}
+@keyframes fade-to-nothing {
+  0% {
+    opacity: 1;
+    filter: grayscale(0%);
+  }
+  100% {
+    opacity: 0;
+    filter: grayscale(100%);
   }
 }

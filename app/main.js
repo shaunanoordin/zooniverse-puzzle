@@ -76,12 +76,6 @@
 	    this.state = APP.STATE_IDLE;
 	    this.activePiece = null;
 	    this.puzzleBoard = null;
-	    this.easyMode = false;
-	    this.simpleMode = false;
-	    if (window.location && window.location.search && window.location.search.indexOf) {
-	      this.easyMode = window.location.search.indexOf(APP.EASYMODE_STRING) >= 0;
-	      this.simpleMode = window.location.search.indexOf(APP.SIMPLEMODE_STRING) >= 0;
-	    }
 
 	    this.width = 1;
 	    this.height = 1;
@@ -103,14 +97,29 @@
 	      }
 	    };
 
+	    this.easyMode = false;
+	    this.simpleMode = false;
+	    if (window.location && window.location.search && window.location.search.indexOf) {
+	      this.easyMode = window.location.search.indexOf(APP.EASYMODE_STRING) >= 0;
+	      this.simpleMode = window.location.search.indexOf(APP.SIMPLEMODE_STRING) >= 0;
+	    }
+
+	    this.cheatCode = [APP.KEY_CODES.P, APP.KEY_CODES.E, APP.KEY_CODES.N, APP.KEY_CODES.G, APP.KEY_CODES.U, APP.KEY_CODES.I, APP.KEY_CODES.N, APP.KEY_CODES.S];
+	    this.cheatCodeLevel = 0;
+	    this.goSolveEverything = false;
+
 	    if ("onresize" in window) {
 	      window.onresize = this.updateSize.bind(this);
+	    }
+	    if ("onkeypress" in window) {
+	      window.onkeypress = this.onKeyPress.bind(this);
 	    }
 
 	    this.initPuzzleBoard();
 	    this.runCycle = setInterval(this.run.bind(this), 1000 / APP.FRAMES_PER_SECOND);
 
-	    document.getElementById("help").onclick = this.onHelpClick.bind(this);
+	    document.getElementById("help-button").onclick = this.onHelpClick.bind(this);
+	    document.getElementById("hint-button").onclick = this.onHintClick.bind(this);
 	  }
 
 	  _createClass(App, [{
@@ -131,6 +140,14 @@
 	      grid.style.height = gridHeight * APP.PIECE_SIZE + "px";
 	      grid.style.left = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
 	      grid.style.top = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
+
+	      var hint = document.getElementById("hint");
+	      console.log(hint);
+	      hint.style.width = gridWidth * APP.PIECE_SIZE + "px";
+	      hint.style.height = gridHeight * APP.PIECE_SIZE + "px";
+	      hint.style.left = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
+	      hint.style.top = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
+	      hint.style.backgroundImage = "url('assets/" + imageFile + "')";
 
 	      if (this.simpleMode) {
 	        gridWidth = gridWidth / APP.SIMPLEMODE_MULTIPLIER;
@@ -200,6 +217,20 @@
 	      this.sizeRatioY = this.height / this.boundingBox.height;
 	    }
 	  }, {
+	    key: "onKeyPress",
+	    value: function onKeyPress(e) {
+	      var key = getKeyCode(e);
+	      if (this.cheatCodeLevel < this.cheatCode.length && key === this.cheatCode[this.cheatCodeLevel]) {
+	        this.cheatCodeLevel++;
+	      } else {
+	        this.cheatCodeLevel = 0;
+	      }
+
+	      if (this.cheatCodeLevel >= this.cheatCode.length) {
+	        this.goSolveEverything = true;
+	      }
+	    }
+	  }, {
 	    key: "checkWinStatus",
 	    value: function checkWinStatus() {
 	      var winStatus = true;
@@ -215,6 +246,7 @@
 	      if (winStatus) {
 	        title.className = "winner";
 	        title.innerHTML = APP.WINNER_MESSAGE;
+	        this.goSolveEverything = false;
 	      } else {
 	        title.className = "";
 	        title.innerHTML = APP.START_MESSAGE;
@@ -232,6 +264,16 @@
 	          _this.puzzleBoard.appendChild(piece);
 	        }
 	      });
+	    }
+	  }, {
+	    key: "onHintClick",
+	    value: function onHintClick() {
+	      var hint = document.getElementById("hint");
+	      if (hint.className === "") {
+	        hint.className = "show-hint";
+	      } else {
+	        hint.className = "";
+	      }
 	    }
 	  }, {
 	    key: "onPointerMove",
@@ -314,6 +356,17 @@
 	        this.activePiece.dataset.y = this.pointer.now.y + this.pointer.offset.y;
 	        this.activePiece.style.left = this.activePiece.dataset.x + "px";
 	        this.activePiece.style.top = this.activePiece.dataset.y + "px";
+	      } else if (this.goSolveEverything) {
+	        for (var i = 0; i < this.puzzlePieces.length; i++) {
+	          var piece = this.puzzlePieces[i];
+	          if (piece.dataset.x !== piece.dataset.correctX || piece.dataset.y !== piece.dataset.correctY) {
+	            piece.dataset.x = piece.dataset.correctX;
+	            piece.dataset.y = piece.dataset.correctY;
+	            piece.className = "piece correct";
+	            break;
+	          }
+	        }
+	        this.checkWinStatus();
 	      }
 
 	      this.puzzlePieces.map(function (piece) {
@@ -353,6 +406,24 @@
 	  e.returnValue = false;
 	  e.cancelBubble = true;
 	  return false;
+	}
+
+	function getKeyCode(e) {
+	  //KeyboardEvent.keyCode is the most reliable identifier for a keyboard event
+	  //at the moment, but unfortunately it's being deprecated.
+	  if (e.keyCode) {
+	    return e.keyCode;
+	  }
+
+	  //KeyboardEvent.code and KeyboardEvent.key are the 'new' standards, but it's
+	  //far from being standardised between browsers.
+	  if (e.code && APP.KEY_VALUES[e.code]) {
+	    return APP.KEY_VALUES[e.code];
+	  } else if (e.key && APP.KEY_VALUES[e.key]) {
+	    return APP.KEY_VALUES[e.key];
+	  }
+
+	  return 0;
 	}
 	//==============================================================================
 
@@ -395,6 +466,150 @@
 	var SIMPLEMODE_MULTIPLIER = exports.SIMPLEMODE_MULTIPLIER = 5;
 
 	var AUTO_ANSWER_CLICK_DISTANCE = exports.AUTO_ANSWER_CLICK_DISTANCE = PIECE_SIZE / 2;
+
+	var KEY_CODES = exports.KEY_CODES = {
+	  LEFT: 37,
+	  UP: 38,
+	  RIGHT: 39,
+	  DOWN: 40,
+	  ENTER: 13,
+	  SPACE: 32,
+	  ESCAPE: 27,
+	  TAB: 9,
+	  SHIFT: 16,
+
+	  A: 65,
+	  B: 66,
+	  C: 67,
+	  D: 68,
+	  E: 69,
+	  F: 70,
+	  G: 71,
+	  H: 72,
+	  I: 73,
+	  J: 74,
+	  K: 75,
+	  L: 76,
+	  M: 77,
+	  N: 78,
+	  O: 79,
+	  P: 80,
+	  Q: 81,
+	  R: 82,
+	  S: 83,
+	  T: 84,
+	  U: 85,
+	  V: 86,
+	  W: 87,
+	  X: 88,
+	  Y: 89,
+	  Z: 90,
+
+	  NUM0: 48,
+	  NUM1: 49,
+	  NUM2: 50,
+	  NUM3: 51,
+	  NUM4: 52,
+	  NUM5: 53,
+	  NUM6: 54,
+	  NUM7: 55,
+	  NUM8: 56,
+	  NUM9: 57
+	};
+
+	var KEY_VALUES = exports.KEY_VALUES = {
+	  "ArrowLeft": KEY_CODES.LEFT,
+	  "Left": KEY_CODES.LEFT,
+	  "ArrowUp": KEY_CODES.UP,
+	  "Up": KEY_CODES.UP,
+	  "ArrowDown": KEY_CODES.DOWN,
+	  "Down": KEY_CODES.DOWN,
+	  "ArrowRight": KEY_CODES.RIGHT,
+	  "Right": KEY_CODES.RIGHT,
+	  "Enter": KEY_CODES.ENTER,
+	  "Space": KEY_CODES.SPACE,
+	  " ": KEY_CODES.SPACE,
+	  "Esc": KEY_CODES.ESCAPE,
+	  "Escape": KEY_CODES.ESCAPE,
+	  "Tab": KEY_CODES.TAB,
+	  "Shift": KEY_CODES.SHIFT,
+	  "ShiftLeft": KEY_CODES.SHIFT,
+	  "ShiftRight": KEY_CODES.SHIFT,
+
+	  "A": KEY_CODES.A,
+	  "KeyA": KEY_CODES.A,
+	  "B": KEY_CODES.B,
+	  "KeyB": KEY_CODES.B,
+	  "C": KEY_CODES.C,
+	  "KeyC": KEY_CODES.C,
+	  "D": KEY_CODES.D,
+	  "KeyD": KEY_CODES.D,
+	  "E": KEY_CODES.E,
+	  "KeyE": KEY_CODES.E,
+	  "F": KEY_CODES.F,
+	  "KeyF": KEY_CODES.F,
+	  "G": KEY_CODES.G,
+	  "KeyG": KEY_CODES.G,
+	  "H": KEY_CODES.H,
+	  "KeyH": KEY_CODES.H,
+	  "I": KEY_CODES.I,
+	  "KeyI": KEY_CODES.I,
+	  "J": KEY_CODES.J,
+	  "KeyJ": KEY_CODES.J,
+	  "K": KEY_CODES.K,
+	  "KeyK": KEY_CODES.K,
+	  "L": KEY_CODES.L,
+	  "KeyL": KEY_CODES.L,
+	  "M": KEY_CODES.M,
+	  "KeyM": KEY_CODES.M,
+	  "N": KEY_CODES.N,
+	  "KeyN": KEY_CODES.N,
+	  "O": KEY_CODES.O,
+	  "KeyO": KEY_CODES.O,
+	  "P": KEY_CODES.P,
+	  "KeyP": KEY_CODES.P,
+	  "Q": KEY_CODES.Q,
+	  "KeyQ": KEY_CODES.Q,
+	  "R": KEY_CODES.R,
+	  "KeyR": KEY_CODES.R,
+	  "S": KEY_CODES.S,
+	  "KeyS": KEY_CODES.S,
+	  "T": KEY_CODES.T,
+	  "KeyT": KEY_CODES.T,
+	  "U": KEY_CODES.U,
+	  "KeyU": KEY_CODES.U,
+	  "V": KEY_CODES.V,
+	  "KeyV": KEY_CODES.V,
+	  "W": KEY_CODES.W,
+	  "KeyW": KEY_CODES.W,
+	  "X": KEY_CODES.X,
+	  "KeyX": KEY_CODES.X,
+	  "Y": KEY_CODES.Y,
+	  "KeyY": KEY_CODES.Y,
+	  "Z": KEY_CODES.Z,
+	  "KeyZ": KEY_CODES.Z,
+
+	  "0": KEY_CODES.NUM0,
+	  "Digit0": KEY_CODES.NUM0,
+	  "1": KEY_CODES.NUM1,
+	  "Digit1": KEY_CODES.NUM1,
+	  "2": KEY_CODES.NUM2,
+	  "Digit2": KEY_CODES.NUM2,
+	  "3": KEY_CODES.NUM3,
+	  "Digit3": KEY_CODES.NUM3,
+	  "4": KEY_CODES.NUM4,
+	  "Digit4": KEY_CODES.NUM4,
+	  "5": KEY_CODES.NUM5,
+	  "Digit5": KEY_CODES.NUM5,
+	  "6": KEY_CODES.NUM6,
+	  "Digit6": KEY_CODES.NUM6,
+	  "7": KEY_CODES.NUM7,
+	  "Digit7": KEY_CODES.NUM7,
+	  "8": KEY_CODES.NUM8,
+	  "Digit8": KEY_CODES.NUM8,
+	  "9": KEY_CODES.NUM9,
+	  "Digit9": KEY_CODES.NUM9
+	};
 
 /***/ }
 /******/ ]);
