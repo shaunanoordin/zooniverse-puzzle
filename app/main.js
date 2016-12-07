@@ -77,8 +77,10 @@
 	    this.activePiece = null;
 	    this.puzzleBoard = null;
 	    this.easyMode = false;
+	    this.simpleMode = false;
 	    if (window.location && window.location.search && window.location.search.indexOf) {
 	      this.easyMode = window.location.search.indexOf(APP.EASYMODE_STRING) >= 0;
+	      this.simpleMode = window.location.search.indexOf(APP.SIMPLEMODE_STRING) >= 0;
 	    }
 
 	    this.width = 1;
@@ -126,6 +128,11 @@
 	      grid.style.left = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
 	      grid.style.top = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
 
+	      if (this.simpleMode) {
+	        gridWidth = gridWidth / APP.SIMPLEMODE_MULTIPLIER;
+	        gridHeight = gridHeight / APP.SIMPLEMODE_MULTIPLIER;
+	      }
+
 	      this.puzzlePieces = [];
 	      for (var y = 0; y < gridHeight; y++) {
 	        for (var x = 0; x < gridWidth; x++) {
@@ -142,6 +149,15 @@
 
 	          newPiece.style.backgroundImage = "url('assets/" + imageFile + "')";
 	          newPiece.style.backgroundPosition = "-" + x * APP.PIECE_SIZE + "px -" + y * APP.PIECE_SIZE + "px";
+
+	          if (this.simpleMode) {
+	            newPiece.dataset.correctX = x * APP.PIECE_SIZE * APP.SIMPLEMODE_MULTIPLIER + APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE;
+	            newPiece.dataset.correctY = y * APP.PIECE_SIZE * APP.SIMPLEMODE_MULTIPLIER + APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE;
+	            newPiece.style.width = APP.PIECE_SIZE * APP.SIMPLEMODE_MULTIPLIER + "px";
+	            newPiece.style.height = APP.PIECE_SIZE * APP.SIMPLEMODE_MULTIPLIER + "px";
+	            newPiece.style.backgroundImage = "url('assets/" + imageFile + "')";
+	            newPiece.style.backgroundPosition = "-" + x * APP.PIECE_SIZE * APP.SIMPLEMODE_MULTIPLIER + "px -" + y * APP.PIECE_SIZE * APP.SIMPLEMODE_MULTIPLIER + "px";
+	          }
 
 	          //newPiece.innerHTML = x + "," + y;  //DEBUG
 
@@ -358,6 +374,9 @@
 
 	var EASYMODE_STRING = exports.EASYMODE_STRING = "easymode";
 	var EASYMODE_SUPER_SNAP = exports.EASYMODE_SUPER_SNAP = PIECE_SIZE * 100;
+
+	var SIMPLEMODE_STRING = exports.SIMPLEMODE_STRING = "simplemode";
+	var SIMPLEMODE_MULTIPLIER = exports.SIMPLEMODE_MULTIPLIER = 5;
 
 /***/ }
 /******/ ]);

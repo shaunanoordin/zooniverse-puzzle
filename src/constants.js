@@ -14,3 +14,6 @@ export const START_MESSAGE = "It's a Zooniverse Christmas puzzle!";
 
 export const EASYMODE_STRING = "easymode";
 export const EASYMODE_SUPER_SNAP = PIECE_SIZE * 100;
+
+export const SIMPLEMODE_STRING = "simplemode";
+export const SIMPLEMODE_MULTIPLIER = 5;
