@@ -88,14 +88,15 @@ table th {
 }
 #puzzle .piece:hover {
   border: 1px solid #c33;
-  box-shadow: 2px 2px 8px #333;
+  box-shadow: 4px 4px 8px #333;
 }
 #puzzle .piece.active {
   border: 1px solid #c33;
-  box-shadow: 4px 4px 16px #333;
+  box-shadow: 6px 6px 16px #c33;
 }
 #puzzle .piece.correct {
   border: 1px solid #333;
+  box-shadow: none;
 }
 #help {
   border: 1px solid #333;
