@@ -36,6 +36,10 @@ class App {
         x: 0,
         y: 0,
       },
+      start: {
+        x: 0,
+        y: 0,
+      },
       now: {
         x: 0,
         y: 0,
@@ -190,6 +194,7 @@ class App {
   }
   
   onPiecePointerStart(e) {
+    this.pointer.start = this.getPointerXY(e);
     this.activePiece = e.target;
     this.activePiece.className = "piece active";
     this.pointer.offset.x = e.target.dataset.x - this.pointer.now.x;
@@ -200,9 +205,19 @@ class App {
   
   onPiecePointerEnd(e) {
     this.activePiece = null;
-    const distX = Math.abs(e.target.dataset.x - e.target.dataset.correctX);
-    const distY = Math.abs(e.target.dataset.y - e.target.dataset.correctY);
-    const dist = Math.sqrt(distX * distX + distY * distY);
+    
+    let distX = Math.abs(this.pointer.start.x - this.pointer.now.x);
+    let distY = Math.abs(this.pointer.start.y - this.pointer.now.y);
+    let dist = Math.sqrt(distX * distX + distY * distY);
+    console.log(dist);
+    if (dist < APP.AUTO_ANSWER_CLICK_DISTANCE) {
+      e.target.dataset.x = e.target.dataset.correctX;
+      e.target.dataset.y = e.target.dataset.correctY;
+    }
+    
+    distX = Math.abs(e.target.dataset.x - e.target.dataset.correctX);
+    distY = Math.abs(e.target.dataset.y - e.target.dataset.correctY);
+    dist = Math.sqrt(distX * distX + distY * distY);
     if (dist < APP.SNAP_DISTANCE ||
         (this.simpleMode && dist < APP.SNAP_DISTANCE * APP.SIMPLEMODE_MULTIPLIER) ||
         (this.easyMode && dist < APP.EASYMODE_SUPER_SNAP)) {
@@ -214,6 +229,7 @@ class App {
     } else {
       e.target.className = "piece";
     }
+    
     this.checkWinStatus();
     return stopEvent(e);
   }

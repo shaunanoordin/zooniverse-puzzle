@@ -93,6 +93,10 @@
 	        x: 0,
 	        y: 0
 	      },
+	      start: {
+	        x: 0,
+	        y: 0
+	      },
 	      now: {
 	        x: 0,
 	        y: 0
@@ -262,6 +266,7 @@
 	  }, {
 	    key: "onPiecePointerStart",
 	    value: function onPiecePointerStart(e) {
+	      this.pointer.start = this.getPointerXY(e);
 	      this.activePiece = e.target;
 	      this.activePiece.className = "piece active";
 	      this.pointer.offset.x = e.target.dataset.x - this.pointer.now.x;
@@ -273,9 +278,19 @@
 	    key: "onPiecePointerEnd",
 	    value: function onPiecePointerEnd(e) {
 	      this.activePiece = null;
-	      var distX = Math.abs(e.target.dataset.x - e.target.dataset.correctX);
-	      var distY = Math.abs(e.target.dataset.y - e.target.dataset.correctY);
+
+	      var distX = Math.abs(this.pointer.start.x - this.pointer.now.x);
+	      var distY = Math.abs(this.pointer.start.y - this.pointer.now.y);
 	      var dist = Math.sqrt(distX * distX + distY * distY);
+	      console.log(dist);
+	      if (dist < APP.AUTO_ANSWER_CLICK_DISTANCE) {
+	        e.target.dataset.x = e.target.dataset.correctX;
+	        e.target.dataset.y = e.target.dataset.correctY;
+	      }
+
+	      distX = Math.abs(e.target.dataset.x - e.target.dataset.correctX);
+	      distY = Math.abs(e.target.dataset.y - e.target.dataset.correctY);
+	      dist = Math.sqrt(distX * distX + distY * distY);
 	      if (dist < APP.SNAP_DISTANCE || this.simpleMode && dist < APP.SNAP_DISTANCE * APP.SIMPLEMODE_MULTIPLIER || this.easyMode && dist < APP.EASYMODE_SUPER_SNAP) {
 	        e.target.dataset.x = e.target.dataset.correctX;
 	        e.target.dataset.y = e.target.dataset.correctY;
@@ -285,6 +300,7 @@
 	      } else {
 	        e.target.className = "piece";
 	      }
+
 	      this.checkWinStatus();
 	      return stopEvent(e);
 	    }
@@ -377,6 +393,8 @@
 
 	var SIMPLEMODE_STRING = exports.SIMPLEMODE_STRING = "simplemode";
 	var SIMPLEMODE_MULTIPLIER = exports.SIMPLEMODE_MULTIPLIER = 5;
+
+	var AUTO_ANSWER_CLICK_DISTANCE = exports.AUTO_ANSWER_CLICK_DISTANCE = PIECE_SIZE / 2;
 
 /***/ }
 /******/ ]);

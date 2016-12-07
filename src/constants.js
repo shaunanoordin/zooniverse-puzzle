@@ -17,3 +17,5 @@ export const EASYMODE_SUPER_SNAP = PIECE_SIZE * 100;
 
 export const SIMPLEMODE_STRING = "simplemode";
 export const SIMPLEMODE_MULTIPLIER = 5;
+
+export const AUTO_ANSWER_CLICK_DISTANCE = PIECE_SIZE / 2;
