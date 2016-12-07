@@ -68,12 +68,15 @@ class App {
         newPiece.style.left = newPiece.dataset.x + "px";
         newPiece.style.top = newPiece.dataset.y + "px";
         
+        newPiece.style.backgroundImage = "url('assets/sample.jpg')";
+        newPiece.style.backgroundPosition = "-" + (x * APP.PIECE_SIZE) + "px -" + (y * APP.PIECE_SIZE) + "px";
+        
         newPiece.innerHTML = x + "," + y;  //DEBUG
         
         if ("onmousedown" in newPiece && "onmousemove" in newPiece && "onmouseover" in newPiece) {
           newPiece.onmousedown = this.onPiecePointerStart.bind(this);
           newPiece.onmouseup = this.onPiecePointerEnd.bind(this);
-          newPiece.onmouseover = this.onPointerOver.bind(this);
+          newPiece.onmouseover = this.onPiecePointerOver.bind(this);
         }
         
         if ("ontouchstart" in newPiece && "ontouchend" in newPiece && "ontouchcancel" in newPiece) {
@@ -106,7 +109,7 @@ class App {
     return stopEvent(e);
   }
   
-  onPointerOver(e) {
+  onPiecePointerOver(e) {
     if (!this.activePiece) {
       this.puzzleBoard.appendChild(e.target);
     }
@@ -135,7 +138,7 @@ class App {
     this.pointer.offset.x = e.target.dataset.x - this.pointer.now.x;
     this.pointer.offset.y = e.target.dataset.y - this.pointer.now.y;
     this.puzzleBoard.appendChild(this.activePiece);
-    stopEvent(e);
+    return stopEvent(e);
   }
   
   onPiecePointerEnd(e) {
@@ -152,7 +155,7 @@ class App {
     } else {
       e.target.className = "piece";
     }
-    stopEvent(e);
+    return stopEvent(e);
   }
   
   run() {

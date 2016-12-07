@@ -130,12 +130,15 @@
 	          newPiece.style.left = newPiece.dataset.x + "px";
 	          newPiece.style.top = newPiece.dataset.y + "px";
 
+	          newPiece.style.backgroundImage = "url('assets/sample.jpg')";
+	          newPiece.style.backgroundPosition = "-" + x * APP.PIECE_SIZE + "px -" + y * APP.PIECE_SIZE + "px";
+
 	          newPiece.innerHTML = x + "," + y; //DEBUG
 
 	          if ("onmousedown" in newPiece && "onmousemove" in newPiece && "onmouseover" in newPiece) {
 	            newPiece.onmousedown = this.onPiecePointerStart.bind(this);
 	            newPiece.onmouseup = this.onPiecePointerEnd.bind(this);
-	            newPiece.onmouseover = this.onPointerOver.bind(this);
+	            newPiece.onmouseover = this.onPiecePointerOver.bind(this);
 	          }
 
 	          if ("ontouchstart" in newPiece && "ontouchend" in newPiece && "ontouchcancel" in newPiece) {
@@ -172,8 +175,8 @@
 	      return stopEvent(e);
 	    }
 	  }, {
-	    key: "onPointerOver",
-	    value: function onPointerOver(e) {
+	    key: "onPiecePointerOver",
+	    value: function onPiecePointerOver(e) {
 	      if (!this.activePiece) {
 	        this.puzzleBoard.appendChild(e.target);
 	      }
@@ -203,7 +206,7 @@
 	      this.pointer.offset.x = e.target.dataset.x - this.pointer.now.x;
 	      this.pointer.offset.y = e.target.dataset.y - this.pointer.now.y;
 	      this.puzzleBoard.appendChild(this.activePiece);
-	      stopEvent(e);
+	      return stopEvent(e);
 	    }
 	  }, {
 	    key: "onPiecePointerEnd",
@@ -221,7 +224,7 @@
 	      } else {
 	        e.target.className = "piece";
 	      }
-	      stopEvent(e);
+	      return stopEvent(e);
 	    }
 	  }, {
 	    key: "run",
@@ -297,8 +300,8 @@
 	var FRAMES_PER_SECOND = exports.FRAMES_PER_SECOND = 50;
 
 	var PIECE_SIZE = exports.PIECE_SIZE = 80; //80;
-	var GRID_WIDTH = exports.GRID_WIDTH = 2; //8;
-	var GRID_HEIGHT = exports.GRID_HEIGHT = 2; //6;
+	var GRID_WIDTH = exports.GRID_WIDTH = 11; //8;
+	var GRID_HEIGHT = exports.GRID_HEIGHT = 7; //6;
 	var GUTTER_SIZE = exports.GUTTER_SIZE = 2;
 
 	var STATE_IDLE = exports.STATE_IDLE = 0;
