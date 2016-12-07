@@ -276,7 +276,7 @@
 	      var distX = Math.abs(e.target.dataset.x - e.target.dataset.correctX);
 	      var distY = Math.abs(e.target.dataset.y - e.target.dataset.correctY);
 	      var dist = Math.sqrt(distX * distX + distY * distY);
-	      if (dist < APP.SNAP_DISTANCE || this.easyMode && dist < APP.EASYMODE_SUPER_SNAP) {
+	      if (dist < APP.SNAP_DISTANCE || this.simpleMode && dist < APP.SNAP_DISTANCE * APP.SIMPLEMODE_MULTIPLIER || this.easyMode && dist < APP.EASYMODE_SUPER_SNAP) {
 	        e.target.dataset.x = e.target.dataset.correctX;
 	        e.target.dataset.y = e.target.dataset.correctY;
 	        e.target.style.left = e.target.dataset.x + "px";
