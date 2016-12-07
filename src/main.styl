@@ -7,8 +7,8 @@ highlight-colour = #f33
   box-sizing: border-box
 
 :root
-  font-family: "Lucida Console", monospace
-  font-size: 16px
+  font-family: "Verdana", monospace
+  font-size: 12px
   background: dark-colour url("../assets/simple-bg.png")
   color: dark-colour
 
@@ -48,10 +48,21 @@ table
   padding: 1em
   background: primary-colour
   color: light-colour
+  text-align: center
+  
+  a
+    color: light-colour
   
   h1
+    font-size: 1.2em
     margin: 0
     padding: 0
+    
+    &.winner
+      animation-name: winning-glow
+      animation-duration: 1s
+      animation-iteration-count: infinite
+      text-shadow: 0 0 12px light-colour
 
 #app > main
   flex: 1 1 auto
@@ -73,14 +84,33 @@ table
   .piece
     background: rgba(255, 255, 255, 0.9) no-repeat 0px 0px
     position: absolute
-    border: 1px solid dark-colour
+    border: 1px solid light-colour
     cursor: all-scroll
     touch-action: none  //Prevents IE/Edge from intrepreting touch input as scroll/pan commands.
     
+    &:hover
+      border: 1px solid primary-colour
+      box-shadow: 2px 2px 8px dark-colour;
+    
     &.active
-      border: 1px solid highlight-colour
-      box-shadow: 4px 4px 4px dark-colour;
+      border: 1px solid primary-colour
+      box-shadow: 4px 4px 16px dark-colour;
 
     &.correct
-      border: 1px solid primary-colour
+      border: 1px solid dark-colour
+  
+#help
+  border: 1px solid dark-colour
+  background: primary-colour
+  color: light-colour
+  border-radius: 2em
+  display: block
+  margin: 0.5em auto
 
+@keyframes winning-glow
+  0%
+    color: light-colour
+  50%
+    color: primary-colour
+  100%
+    color: light-colour

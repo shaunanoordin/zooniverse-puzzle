@@ -56,7 +56,7 @@
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ********************************************************************************
 	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
-	var _constants = __webpack_require__(2);
+	var _constants = __webpack_require__(1);
 
 	var APP = _interopRequireWildcard(_constants);
 
@@ -76,6 +76,10 @@
 	    this.state = APP.STATE_IDLE;
 	    this.activePiece = null;
 	    this.puzzleBoard = null;
+	    this.easyMode = false;
+	    if (window.location && window.location.search && window.location.search.indexOf) {
+	      this.easyMode = window.location.search.indexOf(APP.EASYMODE_STRING) >= 0;
+	    }
 
 	    this.width = 1;
 	    this.height = 1;
@@ -99,41 +103,47 @@
 
 	    this.initPuzzleBoard();
 	    this.runCycle = setInterval(this.run.bind(this), 1000 / APP.FRAMES_PER_SECOND);
+
+	    document.getElementById("help").onclick = this.onHelpClick.bind(this);
 	  }
 
 	  _createClass(App, [{
 	    key: "initPuzzleBoard",
 	    value: function initPuzzleBoard() {
+	      var imageFile = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "penguins.jpg";
+	      var gridWidth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : APP.GRID_WIDTH;
+	      var gridHeight = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : APP.GRID_HEIGHT;
+
 	      this.puzzleBoard = document.getElementById("puzzle");
-	      this.width = (APP.GRID_WIDTH + APP.GUTTER_SIZE) * APP.PIECE_SIZE;
-	      this.height = (APP.GRID_HEIGHT + APP.GUTTER_SIZE) * APP.PIECE_SIZE;
+	      this.width = (gridWidth + APP.GUTTER_SIZE) * APP.PIECE_SIZE;
+	      this.height = (gridHeight + APP.GUTTER_SIZE) * APP.PIECE_SIZE;
 	      this.puzzleBoard.style.width = this.width + "px";
 	      this.puzzleBoard.style.height = this.height + "px";
 
 	      var grid = document.getElementById("grid");
-	      grid.style.width = APP.GRID_WIDTH * APP.PIECE_SIZE + "px";
-	      grid.style.height = APP.GRID_HEIGHT * APP.PIECE_SIZE + "px";
+	      grid.style.width = gridWidth * APP.PIECE_SIZE + "px";
+	      grid.style.height = gridHeight * APP.PIECE_SIZE + "px";
 	      grid.style.left = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
 	      grid.style.top = APP.GUTTER_SIZE / 2 * APP.PIECE_SIZE + "px";
 
 	      this.puzzlePieces = [];
-	      for (var y = 0; y < APP.GRID_HEIGHT; y++) {
-	        for (var x = 0; x < APP.GRID_WIDTH; x++) {
+	      for (var y = 0; y < gridHeight; y++) {
+	        for (var x = 0; x < gridWidth; x++) {
 	          var newPiece = document.createElement("div");
 	          newPiece.className = "piece";
 	          newPiece.dataset.correctX = (x + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE;
 	          newPiece.dataset.correctY = (y + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE;
-	          newPiece.dataset.x = Math.floor(Math.random() * (APP.GRID_WIDTH + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE);
-	          newPiece.dataset.y = Math.floor(Math.random() * (APP.GRID_HEIGHT + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE);
+	          newPiece.dataset.x = Math.floor(Math.random() * (gridWidth + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE);
+	          newPiece.dataset.y = Math.floor(Math.random() * (gridHeight + APP.GUTTER_SIZE / 2) * APP.PIECE_SIZE);
 	          newPiece.style.width = APP.PIECE_SIZE + "px";
 	          newPiece.style.height = APP.PIECE_SIZE + "px";
 	          newPiece.style.left = newPiece.dataset.x + "px";
 	          newPiece.style.top = newPiece.dataset.y + "px";
 
-	          newPiece.style.backgroundImage = "url('assets/sample.jpg')";
+	          newPiece.style.backgroundImage = "url('assets/" + imageFile + "')";
 	          newPiece.style.backgroundPosition = "-" + x * APP.PIECE_SIZE + "px -" + y * APP.PIECE_SIZE + "px";
 
-	          newPiece.innerHTML = x + "," + y; //DEBUG
+	          //newPiece.innerHTML = x + "," + y;  //DEBUG
 
 	          if ("onmousedown" in newPiece && "onmousemove" in newPiece && "onmouseover" in newPiece) {
 	            newPiece.onmousedown = this.onPiecePointerStart.bind(this);
@@ -159,6 +169,7 @@
 	        this.puzzleBoard.ontouchmove = this.onPointerMove.bind(this);
 	      }
 	      this.updateSize();
+	      this.checkWinStatus();
 	    }
 	  }, {
 	    key: "updateSize",
@@ -169,6 +180,40 @@
 	      this.sizeRatioY = this.height / this.boundingBox.height;
 	    }
 	  }, {
+	    key: "checkWinStatus",
+	    value: function checkWinStatus() {
+	      var winStatus = true;
+	      if (this.activePiece) {
+	        winStatus = false;
+	      }
+
+	      this.puzzlePieces.map(function (piece) {
+	        winStatus = winStatus && piece.dataset.x === piece.dataset.correctX && piece.dataset.y === piece.dataset.correctY;
+	      });
+
+	      var title = document.getElementById("title");
+	      if (winStatus) {
+	        title.className = "winner";
+	        title.innerHTML = APP.WINNER_MESSAGE;
+	      } else {
+	        title.className = "";
+	        title.innerHTML = APP.START_MESSAGE;
+	      }
+	    }
+	  }, {
+	    key: "onHelpClick",
+	    value: function onHelpClick() {
+	      var _this = this;
+
+	      if (!this.puzzleBoard) return;
+
+	      this.puzzlePieces.map(function (piece) {
+	        if (piece.dataset.x !== piece.dataset.correctX || piece.dataset.y !== piece.dataset.correctY) {
+	          _this.puzzleBoard.appendChild(piece);
+	        }
+	      });
+	    }
+	  }, {
 	    key: "onPointerMove",
 	    value: function onPointerMove(e) {
 	      this.pointer.now = this.getPointerXY(e);
@@ -177,7 +222,7 @@
 	  }, {
 	    key: "onPiecePointerOver",
 	    value: function onPiecePointerOver(e) {
-	      if (!this.activePiece) {
+	      if (!this.activePiece && !(e.target.dataset.x === e.target.dataset.correctX && e.target.dataset.y === e.target.dataset.correctY)) {
 	        this.puzzleBoard.appendChild(e.target);
 	      }
 	      return stopEvent(e);
@@ -215,7 +260,7 @@
 	      var distX = Math.abs(e.target.dataset.x - e.target.dataset.correctX);
 	      var distY = Math.abs(e.target.dataset.y - e.target.dataset.correctY);
 	      var dist = Math.sqrt(distX * distX + distY * distY);
-	      if (dist < APP.SNAP_DISTANCE) {
+	      if (dist < APP.SNAP_DISTANCE || this.easyMode && dist < APP.EASYMODE_SUPER_SNAP) {
 	        e.target.dataset.x = e.target.dataset.correctX;
 	        e.target.dataset.y = e.target.dataset.correctY;
 	        e.target.style.left = e.target.dataset.x + "px";
@@ -224,12 +269,13 @@
 	      } else {
 	        e.target.className = "piece";
 	      }
+	      this.checkWinStatus();
 	      return stopEvent(e);
 	    }
 	  }, {
 	    key: "run",
 	    value: function run() {
-	      var _this = this;
+	      var _this2 = this;
 
 	      if (this.activePiece) {
 	        this.activePiece.dataset.x = this.pointer.now.x + this.pointer.offset.x;
@@ -239,18 +285,18 @@
 	      }
 
 	      this.puzzlePieces.map(function (piece) {
-	        if (piece !== _this.activePiece) {
+	        if (piece !== _this2.activePiece) {
 	          if (piece.dataset.x < 0) {
 	            piece.dataset.x = 0;
 	          }
 	          if (piece.dataset.y < 0) {
 	            piece.dataset.y = 0;
 	          }
-	          if (piece.dataset.x > _this.width - APP.PIECE_SIZE) {
-	            piece.dataset.x = _this.width - APP.PIECE_SIZE;
+	          if (piece.dataset.x > _this2.width - APP.PIECE_SIZE) {
+	            piece.dataset.x = _this2.width - APP.PIECE_SIZE;
 	          }
-	          if (piece.dataset.y > _this.height - APP.PIECE_SIZE) {
-	            piece.dataset.y = _this.height - APP.PIECE_SIZE;
+	          if (piece.dataset.y > _this2.height - APP.PIECE_SIZE) {
+	            piece.dataset.y = _this2.height - APP.PIECE_SIZE;
 	          }
 	          piece.style.left = piece.dataset.x + "px";
 	          piece.style.top = piece.dataset.y + "px";
@@ -288,8 +334,7 @@
 	//==============================================================================
 
 /***/ },
-/* 1 */,
-/* 2 */
+/* 1 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -299,15 +344,20 @@
 	});
 	var FRAMES_PER_SECOND = exports.FRAMES_PER_SECOND = 50;
 
-	var PIECE_SIZE = exports.PIECE_SIZE = 80; //80;
-	var GRID_WIDTH = exports.GRID_WIDTH = 11; //8;
-	var GRID_HEIGHT = exports.GRID_HEIGHT = 7; //6;
+	var PIECE_SIZE = exports.PIECE_SIZE = 50; //80;
+	var GRID_WIDTH = exports.GRID_WIDTH = 20; //8;
+	var GRID_HEIGHT = exports.GRID_HEIGHT = 15; //6;
 	var GUTTER_SIZE = exports.GUTTER_SIZE = 2;
 
 	var STATE_IDLE = exports.STATE_IDLE = 0;
 	var STATE_MOVING = exports.STATE_MOVING = 1;
 
 	var SNAP_DISTANCE = exports.SNAP_DISTANCE = PIECE_SIZE / 1.2;
+	var WINNER_MESSAGE = exports.WINNER_MESSAGE = "A WINNER IS YOU! MERRY CHRISTMAS FROM THE ZOONIVERSE!";
+	var START_MESSAGE = exports.START_MESSAGE = "It's a Zooniverse Christmas puzzle!";
+
+	var EASYMODE_STRING = exports.EASYMODE_STRING = "easymode";
+	var EASYMODE_SUPER_SNAP = exports.EASYMODE_SUPER_SNAP = PIECE_SIZE * 100;
 
 /***/ }
 /******/ ]);
